@@ -1,0 +1,56 @@
+networks:
+  dbaccess:
+    name: hims-dbaccess
+    driver: bridge
+
+volumes:
+  data:
+    name: hims-dbdata
+    driver: local
+
+configs:
+  env-config:
+    file: ./.env.${ENV_SHORTNAME}
+
+secrets:
+  hims-mariadb-rootpw:
+    file: ./.secrets/hims-mariadb-rootpw
+  hims-mariadb-pw:
+    file: ./.secrets/hims-mariadb-pw
+
+services:
+  app:
+    profiles:
+      - app
+    build:
+      dockerfile: HomeIMS.dockerfile
+    image: hims-${ENV_SHORTNAME}-app
+    container_name: hims-${ENV_SHORTNAME}-app
+    depends_on:
+      - db
+    networks:
+      - dbaccess
+    ports:
+      - 4200:80
+    secrets:
+      - hims-mariadb-pw
+    configs:
+      - env-config
+
+  db:
+    profiles:
+      - backend
+    image: mariadb
+    container_name: hims-db
+    restart: unless-stopped
+    networks:
+      - dbaccess
+    secrets:
+      - hims-mariadb-rootpw
+      - hims-mariadb-pw
+    environment:
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/hims-mariadb-rootpw
+      - MARIADB_USER=hims
+      - MARIADB_PASSWORD_FILE=/run/secrets/hims-mariadb-pw
+    volumes:
+      - data:/var/lib/mysql
