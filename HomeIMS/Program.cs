@@ -1,5 +1,9 @@
 using System.Data.Common;
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.Types;
 using HomeIMS.DataAccess;
+using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +28,15 @@ builder.Services.AddDbContext<HomeImsContext>(
     ServiceLifetime.Transient
 );
 
+builder.Services.AddSingleton<HomeImsQuery>();
+builder.Services.AddSingleton<HomeImsMutation>();
+builder.Services.AddSingleton<ISchema, HomeImsSchema>();
+
+GraphQL.MicrosoftDI.GraphQLBuilderExtensions.AddGraphQL(builder.Services)
+    .AddServer(true)
+    .AddSystemTextJson()
+    .AddGraphTypes(typeof(HomeImsSchema).Assembly);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,10 +50,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+app.UseGraphQL<ISchema>();
+app.UseGraphQLPlayground();
 
 app.MapFallbackToFile("index.html");;
 
