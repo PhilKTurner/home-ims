@@ -7,8 +7,9 @@ using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddIniFile("/env-config", true);
-builder.Configuration.AddKeyPerFile("/run/secrets", true);
+
+builder.Configuration.AddIniFile("/env-config");
+builder.Configuration.AddKeyPerFile("/run/secrets");
 
 // Add services to the container.
 
