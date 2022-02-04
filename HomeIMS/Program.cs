@@ -1,10 +1,13 @@
 using System.Data.Common;
 using GraphQL;
 using GraphQL.Server;
+using GraphQL.Server.Transports.AspNetCore;
 using GraphQL.Types;
 using HomeIMS.DataAccess;
 using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
+
+// TODO Research why this approach replaced Startup in dotnet scaffolding
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,7 @@ builder.Configuration.AddKeyPerFile("/run/secrets");
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRouting();
 
 var connectionStringBuilder = new DbConnectionStringBuilder();
 connectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionString("HimsDatabase");
@@ -51,9 +55,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseGraphQL<ISchema>();
-app.UseGraphQLPlayground();
+app.UseEndpoints(endpoints => 
+{
+    endpoints.MapGraphQL<HomeImsSchema, GraphQLHttpMiddleware<HomeImsSchema>>();
+    endpoints.MapGraphQLPlayground();
+});
 
-app.MapFallbackToFile("index.html");;
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller}/{action=Index}/{id?}");
 
 app.Run();
