@@ -1,3 +1,5 @@
+version: '3.4'
+
 networks:
   dbaccess:
     name: hims-dbaccess
@@ -31,7 +33,8 @@ services:
     networks:
       - dbaccess
     ports:
-      - 4200:80
+    # TODO Find a way to differentiate between dev and prod port mapping
+      - 5000:5000
     secrets:
       - hims-mariadb-pw
     configs:

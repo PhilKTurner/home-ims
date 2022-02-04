@@ -1,0 +1,19 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+
+# TODO evaluate multi-file approach for env differentiation
+
+version: '3.4'
+
+services:
+  homeims:
+    image: homeims
+    build:
+      context: .
+      dockerfile: HomeIMS/Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
