@@ -6,13 +6,9 @@ networks:
     driver: bridge
 
 volumes:
-  data:
+  dbdata:
     name: hims-dbdata
     driver: local
-
-configs:
-  env-config:
-    file: ./.env.${ENV_SHORTNAME}
 
 secrets:
   hims-mariadb-rootpw:
@@ -23,25 +19,32 @@ secrets:
 services:
   app:
     profiles:
+      - all
       - app
     build:
+      context: .
       dockerfile: HomeIMS.dockerfile
-    image: hims-${ENV_SHORTNAME}-app
-    container_name: hims-${ENV_SHORTNAME}-app
+    image: hims-app
+    container_name: hims-app
     depends_on:
       - db
     networks:
       - dbaccess
     ports:
     # TODO Find a way to differentiate between dev and prod port mapping
-      - 5000:5000
+      - 5000:80
+      - 5001:443
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=thisisatest
+    volumes:
+      - ~/.aspnet/https:/https:ro
     secrets:
       - hims-mariadb-pw
-    configs:
-      - env-config
 
   db:
     profiles:
+      - all
       - backend
     image: mariadb
     container_name: hims-db
@@ -53,7 +56,8 @@ services:
       - hims-mariadb-pw
     environment:
       - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/hims-mariadb-rootpw
+      - MARIADB_DATABASE=hims-db
       - MARIADB_USER=hims
       - MARIADB_PASSWORD_FILE=/run/secrets/hims-mariadb-pw
     volumes:
-      - data:/var/lib/mysql
+      - dbdata:/var/lib/mysql

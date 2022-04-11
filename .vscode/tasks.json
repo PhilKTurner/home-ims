@@ -45,11 +45,11 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "homeims:dev",
-                "target": "base",
+                "tag": "hims-app:dev",
+                "target": "build",
                 "dockerfile": "${workspaceFolder}/HomeIMS.dockerfile",
                 "context": "${workspaceFolder}",
-                "pull": true
+                "pull": false
             },
             "netCore": {
                 "appProject": "${workspaceFolder}/HomeIMS/HomeIMS.csproj"
@@ -62,7 +62,7 @@
                 "build"
             ],
             "dockerBuild": {
-                "tag": "homeims:latest",
+                "tag": "hims-app:latest",
                 "dockerfile": "${workspaceFolder}/HomeIMS.dockerfile",
                 "context": "${workspaceFolder}",
                 "pull": true
@@ -77,10 +77,34 @@
             "dependsOn": [
                 "docker-build: debug"
             ],
-            "dockerRun": {},
+            "dockerRun": {
+                "network": "hims-dbaccess",
+                "ports": [
+                    {
+                        "containerPort": 80,
+                        "hostPort": 5000
+                    },
+                    {
+                        "containerPort": 443,
+                        "hostPort": 5001
+                    }
+                ],
+                "volumes": [
+                    {
+                        "localPath": "%USERPROFILE%/.aspnet/https",
+                        "containerPath": "/https",
+                        "permissions": "ro"
+                    }
+                ],
+                "env": {
+                    "ASPNETCORE_Kestrel__Certificates__Default__Path":"/https/aspnetapp.pfx",
+                    "ASPNETCORE_Kestrel__Certificates__Default__Password": "thisisatest"
+                }
+            },
             "netCore": {
                 "appProject": "${workspaceFolder}/HomeIMS/HomeIMS.csproj",
-                "enableDebugging": true
+                "enableDebugging": true,
+                "configureSsl": true
             }
         },
         {

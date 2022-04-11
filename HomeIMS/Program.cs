@@ -11,9 +11,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddIniFile("/env-config");
-builder.Configuration.AddKeyPerFile("/run/secrets");
-
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
@@ -21,16 +18,23 @@ builder.Services.AddRouting();
 
 var connectionStringBuilder = new DbConnectionStringBuilder();
 connectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionString("HimsDatabase");
-connectionStringBuilder.Add("Database", builder.Configuration["DB_NAME"]);
-connectionStringBuilder.Add("Password", builder.Configuration["hims-mariadb-pw"]);
+
+if (builder.Environment.IsDevelopment())
+{
+    connectionStringBuilder.Add("Password", builder.Configuration["HimsDatabase:Password"]);
+} else if (Directory.Exists("/run/secrets")) {
+    builder.Configuration.AddKeyPerFile("/run/secrets");
+    connectionStringBuilder.Add("Password", builder.Configuration["hims-mariadb-pw"]);
+} else {
+    throw new Exception("Password for database access not found.");
+}
 
 builder.Services.AddDbContext<HomeImsContext>(
     options => options.UseMySql(
             connectionStringBuilder.ConnectionString,
             new MariaDbServerVersion("10.6.5"),
             options => options.EnableRetryOnFailure()
-        ),
-    ServiceLifetime.Transient
+        )
 );
 
 builder.Services.AddSingleton<HomeImsQuery>();
@@ -64,5 +68,7 @@ app.UseEndpoints(endpoints =>
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
+
+app.MapFallbackToFile("index.html");
 
 app.Run();

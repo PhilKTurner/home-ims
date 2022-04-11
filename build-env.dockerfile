@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
 
 # Setup NodeJs
 RUN apt-get update && \
