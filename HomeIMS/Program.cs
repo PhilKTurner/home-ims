@@ -2,7 +2,6 @@ using System.Data.Common;
 using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.Types;
 using HomeIMS.DataAccess;
 using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
@@ -39,11 +38,12 @@ builder.Services.AddDbContext<HomeImsContext>(
 
 builder.Services.AddSingleton<HomeImsQuery>();
 builder.Services.AddSingleton<HomeImsMutation>();
-builder.Services.AddSingleton<ISchema, HomeImsSchema>();
+builder.Services.AddSingleton<HomeImsSchema>();
 
 GraphQL.MicrosoftDI.GraphQLBuilderExtensions.AddGraphQL(builder.Services)
     .AddServer(true)
     .AddSystemTextJson()
+    .AddErrorInfoProvider(options => options.ExposeExceptionStackTrace = builder.Environment.IsDevelopment())
     .AddGraphTypes(typeof(HomeImsSchema).Assembly);
 
 var app = builder.Build();
@@ -53,6 +53,12 @@ if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HomeImsContext>();
+    db.Database.Migrate();
 }
 
 app.UseHttpsRedirection();
