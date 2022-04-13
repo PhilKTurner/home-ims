@@ -68,7 +68,6 @@ app.UseRouting();
 app.UseEndpoints(endpoints => 
 {
     endpoints.MapGraphQL<HomeImsSchema, GraphQLHttpMiddleware<HomeImsSchema>>();
-    endpoints.MapGraphQLPlayground();
 });
 
 app.MapControllerRoute(
