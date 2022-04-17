@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { CatalogManagementRoutingModule } from './catalog-management-routing.module';
 import { ArticleEditorComponent } from './article-editor/article-editor.component';
 import { ArticleListComponent } from './article-list/article-list.component';
+import { GraphQLModule } from '../graphql.module';
 
 
 @NgModule({
@@ -13,7 +14,8 @@ import { ArticleListComponent } from './article-list/article-list.component';
   ],
   imports: [
     CommonModule,
-    CatalogManagementRoutingModule
+    CatalogManagementRoutingModule,
+    GraphQLModule
   ]
 })
 export class CatalogManagementModule { }

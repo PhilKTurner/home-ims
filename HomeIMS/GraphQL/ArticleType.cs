@@ -8,7 +8,7 @@ public class ArticleType : ObjectGraphType<Article>
     public ArticleType()
     {
         Field(x => x.Id);
-        Field(x => x.EAN);
+        Field(nameof(Article.EAN).ToLower(), x => x.EAN);
         Field(x => x.Description);
     }
 }

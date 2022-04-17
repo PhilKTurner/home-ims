@@ -9,6 +9,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CatalogManagementModule } from './catalog-management/catalog-management.module';
+import { GraphQLModule } from './graphql.module';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { CatalogManagementModule } from './catalog-management/catalog-management
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    CatalogManagementModule
+    CatalogManagementModule,
+    GraphQLModule
   ],
   providers: [],
   bootstrap: [AppComponent]
