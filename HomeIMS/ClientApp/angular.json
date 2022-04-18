@@ -77,7 +77,7 @@
             },
             "development": {
               "browserTarget": "HomeIMS:build:development",
-              "proxyConfig": "proxy.conf.js"
+              "ssl": true
             }
           },
           "defaultConfiguration": "development"

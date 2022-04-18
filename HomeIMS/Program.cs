@@ -2,6 +2,7 @@ using System.Data.Common;
 using GraphQL;
 using GraphQL.Server;
 using GraphQL.Server.Transports.AspNetCore;
+using GraphQL.Types;
 using HomeIMS.DataAccess;
 using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,12 @@ GraphQL.MicrosoftDI.GraphQLBuilderExtensions.AddGraphQL(builder.Services)
     .AddGraphTypes(typeof(HomeImsSchema).Assembly);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    // CORS is only necessary in separated setup for dev environment
+    app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -82,11 +82,11 @@
                 "ports": [
                     {
                         "containerPort": 80,
-                        "hostPort": 5000
+                        "hostPort": 5100
                     },
                     {
                         "containerPort": 443,
-                        "hostPort": 5001
+                        "hostPort": 5101
                     }
                 ],
                 "volumes": [
