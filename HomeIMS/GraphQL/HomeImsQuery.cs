@@ -17,8 +17,11 @@ public class HomeImsQuery : ObjectGraphType
 
     private List<Article> Articles()
     {
-        var himsContext = serviceProvider.GetService<HomeImsContext>() ?? throw new NullReferenceException();
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var himsContext = scope.ServiceProvider.GetService<HomeImsContext>() ?? throw new NullReferenceException();
 
-        return himsContext.Articles.ToList();
+            return himsContext.Articles.ToList();
+        }
     }
 }

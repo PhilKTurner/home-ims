@@ -38,7 +38,7 @@ builder.Services.AddDbContext<HomeImsContext>(
 
 builder.Services.AddSingleton<HomeImsQuery>();
 builder.Services.AddSingleton<HomeImsMutation>();
-builder.Services.AddSingleton<HomeImsSchema>();
+builder.Services.AddSingleton<ISchema, HomeImsSchema>();
 
 GraphQL.MicrosoftDI.GraphQLBuilderExtensions.AddGraphQL(builder.Services)
     .AddServer(true)
@@ -67,7 +67,7 @@ app.UseRouting();
 
 app.UseEndpoints(endpoints => 
 {
-    endpoints.MapGraphQL<HomeImsSchema, GraphQLHttpMiddleware<HomeImsSchema>>();
+    endpoints.MapGraphQL<ISchema, GraphQLHttpMiddleware<ISchema>>();
 });
 
 app.MapControllerRoute(
