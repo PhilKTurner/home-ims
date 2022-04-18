@@ -6,6 +6,8 @@ import { ArticleEditorComponent } from './article-editor/article-editor.componen
 import { ArticleListComponent } from './article-list/article-list.component';
 import { GraphQLModule } from '../graphql.module';
 
+import {MatTableModule} from '@angular/material/table';
+
 
 @NgModule({
   declarations: [
@@ -15,7 +17,8 @@ import { GraphQLModule } from '../graphql.module';
   imports: [
     CommonModule,
     CatalogManagementRoutingModule,
-    GraphQLModule
+    GraphQLModule,
+    MatTableModule
   ]
 })
 export class CatalogManagementModule { }
