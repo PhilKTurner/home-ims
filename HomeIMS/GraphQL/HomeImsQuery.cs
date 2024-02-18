@@ -1,27 +1,18 @@
-using GraphQL.Types;
 using HomeIMS.Contracts;
 using HomeIMS.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeIMS.GraphQL;
 
-public class HomeImsQuery : ObjectGraphType
+public class HomeImsQuery
 {
-    private readonly IServiceProvider serviceProvider;
-
-    public HomeImsQuery(IServiceProvider serviceProvider)
-    {
-        this.serviceProvider = serviceProvider;
-
-        Field<ListGraphType<ArticleType>>("articles", resolve: context => Articles());
-    }
-
-    private List<Article> Articles()
+    public async Task<IEnumerable<Article>> Articles([Service] IServiceProvider serviceProvider)
     {
         using (var scope = serviceProvider.CreateScope())
         {
             var himsContext = scope.ServiceProvider.GetService<HomeImsContext>() ?? throw new NullReferenceException();
 
-            return himsContext.Articles.ToList();
+            return await himsContext.Articles.ToListAsync();
         }
     }
 }

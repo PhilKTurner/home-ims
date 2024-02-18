@@ -17,5 +17,5 @@ docker build -f build-env.dockerfile -t hims-build-env .
 Build images and run containers for application and backend:
 
 ```
-docker-compose --env-file ./.env.dev --profile backend --profile app up -d
+docker-compose --profile backend --profile app up -d
 ```

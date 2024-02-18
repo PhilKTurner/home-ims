@@ -1,8 +1,5 @@
+using HotChocolate;
 using System.Data.Common;
-using GraphQL;
-using GraphQL.Server;
-using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.Types;
 using HomeIMS.DataAccess;
 using HomeIMS.GraphQL;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +18,10 @@ connectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionSt
 
 if (builder.Environment.IsDevelopment())
 {
-    connectionStringBuilder.Add("Password", builder.Configuration["HimsDatabase:Password"]);
+    connectionStringBuilder.Add("Password", builder.Configuration["HimsDatabase:Password"] ?? string.Empty);
 } else if (Directory.Exists("/run/secrets")) {
     builder.Configuration.AddKeyPerFile("/run/secrets");
-    connectionStringBuilder.Add("Password", builder.Configuration["hims-mariadb-pw"]);
+    connectionStringBuilder.Add("Password", builder.Configuration["hims-mariadb-pw"] ?? string.Empty);
 } else {
     throw new Exception("Password for database access not found.");
 }
@@ -37,15 +34,11 @@ builder.Services.AddDbContext<HomeImsContext>(
         )
 );
 
-builder.Services.AddSingleton<HomeImsQuery>();
-builder.Services.AddSingleton<HomeImsMutation>();
-builder.Services.AddSingleton<ISchema, HomeImsSchema>();
-
-GraphQL.MicrosoftDI.GraphQLBuilderExtensions.AddGraphQL(builder.Services)
-    .AddServer(true)
-    .AddSystemTextJson()
-    .AddErrorInfoProvider(options => options.ExposeExceptionStackTrace = builder.Environment.IsDevelopment())
-    .AddGraphTypes(typeof(HomeImsSchema).Assembly);
+builder.Services
+       .AddGraphQLServer()
+       .RegisterDbContext<HomeImsContext>()
+       .AddQueryType<HomeImsQuery>()
+       .AddType<ArticleType>();
 
 var app = builder.Build();
 
@@ -70,12 +63,10 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
-app.UseEndpoints(endpoints => 
-{
-    endpoints.MapGraphQL<ISchema, GraphQLHttpMiddleware<ISchema>>();
-});
+app.MapGraphQL();
 
 app.MapControllerRoute(
     name: "default",

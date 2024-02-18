@@ -14,14 +14,14 @@ export class ArticleService {
 
   public getArticles(): Observable<Article[]> {
     const articleQuery = gql`
-    query getArticles {
-      articles {
-        id,
-        ean,
-        description
+      query getArticles {
+        articles {
+          id,
+          ean,
+          description
+        }
       }
-    }
-  `
+    `
 
     return this.apollo
       .query<any>({

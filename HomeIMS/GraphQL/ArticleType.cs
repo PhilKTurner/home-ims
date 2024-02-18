@@ -1,14 +1,15 @@
-using GraphQL.Types;
 using HomeIMS.Contracts;
 
 namespace HomeIMS.GraphQL;
 
-public class ArticleType : ObjectGraphType<Article>
+public class ArticleType : ObjectType<Article>
 {
-    public ArticleType()
+    protected override void Configure(IObjectTypeDescriptor<Article> descriptor)
     {
-        Field(x => x.Id);
-        Field(nameof(Article.EAN).ToLower(), x => x.EAN);
-        Field(x => x.Description);
+        descriptor.Name("BookAuthor");
+
+        descriptor
+            .Field(f => f.EAN)
+            .Name(nameof(Article.EAN).ToLower());
     }
 }

@@ -15,7 +15,7 @@ FROM build AS publish
 RUN dotnet publish "HomeIMS/HomeIMS.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
 WORKDIR /app
 
 EXPOSE 80
