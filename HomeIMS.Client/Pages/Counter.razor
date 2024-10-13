@@ -1,5 +1,12 @@
 ﻿@page "/counter"
 
+@using HomeIMS.SharedContracts
+@using System.Text.Json
+@using System.Text
+
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
@@ -11,8 +18,17 @@
 @code {
     private int currentCount = 0;
 
-    private void IncrementCount()
+    private async Task IncrementCount()
     {
-        currentCount++;
+        var counterEvent = new CounterIncrementedEvent { Timestamp = DateTime.UtcNow };
+        var serializedCounterEvent = JsonSerializer.Serialize(counterEvent);
+        var content = new StringContent(serializedCounterEvent, Encoding.UTF8, "application/json");
+
+        var response = await HttpClient.PostAsync("event", content);
+    
+        if (response.IsSuccessStatusCode)
+        {
+            currentCount++;
+        }
     }
 }

@@ -1,4 +1,7 @@
 
+using System.Text;
+using EventStore.Client;
+
 namespace HomeIMS.Server;
 
 public class Program
@@ -45,6 +48,32 @@ public class Program
             return forecast;
         })
         .WithName("GetWeatherForecast")
+        .WithOpenApi();
+
+        app.MapPost("/event", async (HttpContext httpContext) =>
+        {
+            const string connectionString = "esdb://hims-eventstore:2113?tls=false&tlsVerifyCert=false";
+            var settings = EventStoreClientSettings.Create(connectionString);
+            var client = new EventStoreClient(settings);
+
+            var bodyReader = new StreamReader(httpContext.Request.Body);
+            var bodyContent = await bodyReader.ReadToEndAsync();
+
+            var eventData = new EventData(
+                Uuid.NewUuid(),
+                "TestEvent",
+                Encoding.UTF8.GetBytes(bodyContent)
+            );
+
+            await client.AppendToStreamAsync(
+                "event-stream",
+                StreamState.Any,
+                new[] { eventData }
+            );
+
+            return Results.Ok();
+        })
+        .WithName("PostEvent")
         .WithOpenApi();
 
         // Set up hosting of client WebAssembly app

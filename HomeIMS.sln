@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeIMS.Client", "HomeIMS.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeIMS.Server", "HomeIMS.Server\HomeIMS.Server.csproj", "{88DD1B34-7A06-4EFE-9580-3EC4624D2379}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeIMS.SharedContracts", "HomeIMS.SharedContracts\HomeIMS.SharedContracts.csproj", "{58CCB035-0387-4B4D-8C61-25220D0040E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{88DD1B34-7A06-4EFE-9580-3EC4624D2379}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88DD1B34-7A06-4EFE-9580-3EC4624D2379}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88DD1B34-7A06-4EFE-9580-3EC4624D2379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58CCB035-0387-4B4D-8C61-25220D0040E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58CCB035-0387-4B4D-8C61-25220D0040E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58CCB035-0387-4B4D-8C61-25220D0040E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58CCB035-0387-4B4D-8C61-25220D0040E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
