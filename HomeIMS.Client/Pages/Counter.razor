@@ -3,6 +3,7 @@
 @using HomeIMS.SharedContracts
 @using System.Text.Json
 @using System.Text
+@using HomeIMS.SharedContracts.Commands
 
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
@@ -13,18 +14,26 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCountByCommand">Click me</button>
 
 @code {
     private int currentCount = 0;
 
-    private async Task IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        var counterEvent = new CounterIncrementedEvent { Timestamp = DateTime.UtcNow };
-        var serializedCounterEvent = JsonSerializer.Serialize(counterEvent);
-        var content = new StringContent(serializedCounterEvent, Encoding.UTF8, "application/json");
+        var response = await HttpClient.GetAsync("counter");
+        var content = await response.Content.ReadAsStringAsync();
+        currentCount = int.Parse(content);
+    }
 
-        var response = await HttpClient.PostAsync("event", content);
+    private async Task IncrementCountByCommand()
+    {
+        var incrementCommand = new IncrementCounterCommand();
+        var commandEnvelope = CommandEnvelope.CreateEnvelope(incrementCommand);
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+
+        var response = await HttpClient.PostAsync("command", content);
     
         if (response.IsSuccessStatusCode)
         {

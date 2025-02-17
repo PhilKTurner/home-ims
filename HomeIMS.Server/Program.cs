@@ -1,6 +1,9 @@
 
 using System.Text;
+using System.Text.Json;
 using EventStore.Client;
+using HomeIMS.Server.CommandHandling;
+using HomeIMS.SharedContracts.Commands;
 
 namespace HomeIMS.Server;
 
@@ -12,6 +15,8 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
+        builder.Services.AddSingleton<CommandRouter>();
+        builder.Services.AddSingleton<IncrementCounterCommandHandler>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -30,51 +35,44 @@ public class Program
 
         app.UseAuthorization();
 
-        var summaries = new[]
+        app.MapPost("/command", async (HttpContext httpContext) =>
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            var bodyReader = new StreamReader(httpContext.Request.Body);
+            var bodyContent = await bodyReader.ReadToEndAsync();
 
-        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-        {
-            var forecast =  Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                {
-                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = summaries[Random.Shared.Next(summaries.Length)]
-                })
-                .ToArray();
-            return forecast;
+            try
+            {
+                var commandEnvelope = JsonSerializer.Deserialize<CommandEnvelope>(bodyContent);
+                var command = commandEnvelope.Deserialize();
+
+                var commandRouter = httpContext.RequestServices.GetRequiredService<CommandRouter>();
+                await commandRouter.Handle(httpContext.RequestServices, command);
+            }
+            catch (System.Exception)
+            {
+                
+                throw;
+            }
+            
         })
-        .WithName("GetWeatherForecast")
+        .WithName("PostCommand")
         .WithOpenApi();
 
-        app.MapPost("/event", async (HttpContext httpContext) =>
+        app.MapGet("/counter", async (HttpContext httpContext) =>
         {
             const string connectionString = "esdb://hims-eventstore:2113?tls=false&tlsVerifyCert=false";
             var settings = EventStoreClientSettings.Create(connectionString);
             var client = new EventStoreClient(settings);
 
-            var bodyReader = new StreamReader(httpContext.Request.Body);
-            var bodyContent = await bodyReader.ReadToEndAsync();
+            var counterEvents = client.ReadStreamAsync(Direction.Backwards, "counter-stream", StreamPosition.End);
 
-            var eventData = new EventData(
-                Uuid.NewUuid(),
-                "TestEvent",
-                Encoding.UTF8.GetBytes(bodyContent)
-            );
+            if (await counterEvents.ReadState == ReadState.StreamNotFound)
+                return Results.Ok(0);
 
-            await client.AppendToStreamAsync(
-                "event-stream",
-                StreamState.Any,
-                new[] { eventData }
-            );
+            var counterEventCount = await counterEvents.CountAsync();
 
-            return Results.Ok();
-        })
-        .WithName("PostEvent")
-        .WithOpenApi();
+            return Results.Ok(counterEventCount);
+        });
 
         // Set up hosting of client WebAssembly app
         app.UseBlazorFrameworkFiles();
