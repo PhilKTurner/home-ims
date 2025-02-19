@@ -1,0 +1,21 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hims-server-debug
+    container_name: hims-server-debug
+    depends_on:
+      - eventstore
+    ports:
+      - 5000:80
+      - 5001:443
+      - 9229:9229 # Expose the debugging port
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=thisisatest
+    volumes:
+      - ~/.aspnet/https:/https:ro
+      #- ./:/app:rw # Mount the current directory to the /app directory in the container for live code updates
+      - ~/.vsdbg:/remote_debugger:rw

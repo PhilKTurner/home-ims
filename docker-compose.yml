@@ -18,26 +18,6 @@ secrets:
     file: ./.secrets/hims-mariadb-pw
 
 services:
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: hims-server
-    container_name: hims-server
-    depends_on:
-      - eventstore
-    ports:
-    # TODO Find a way to differentiate between dev and prod port mapping
-      - 5000:80
-      - 5001:443
-    environment:
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=thisisatest
-    volumes:
-      - ~/.aspnet/https:/https:ro
-    #secrets:
-      #- hims-mariadb-pw
-
   eventstore:
     image: eventstore/eventstore:24.2.0-jammy
     container_name: hims-eventstore
