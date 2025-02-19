@@ -1,0 +1,86 @@
+@startuml Domain
+
+class ArticleGroup {
+  +id: Guid
+  +name: string
+  +description: string
+}
+
+enum FieldDefinitionType {
+  Article
+  InventoryItem
+}
+
+enum FieldType {
+  Boolean
+  Number
+  Text
+  Date
+}
+
+class FieldDefinition {
+  +id: Guid
+  +name: string
+  +definitionType: FieldDefinitionType
+  +fieldType: FieldType
+}
+
+class FieldValue {
+  +id: Guid
+  +itemId: Guid
+  +fieldId: Guid
+  +type: FieldType
+  +booleanValue: boolean?
+  +numberValue: decimal?
+  +textValue: string?
+  +dateValue: DateTimeOffset?
+}
+
+class Article {
+  +id: Guid
+  +name: string
+  +description: string
+}
+
+class HouseholdArticle {
+  ean: string
+  targetAmount: uint?
+  daysAfterOpenUntilPerished: uint?
+}
+
+class Inventory {
+  +id: Guid
+  +articleGroupId: Guid
+  +name: string
+  +description: string
+}
+
+class InventoryItem {
+  +id: Guid
+  +name: string
+  +description: string
+}
+
+class HouseholdInvenoryItem {
+  purchaseDate: DateTimeOffset
+  expirationDate: DateTimeOffset?
+  openDate: DateTimeOffset?
+}
+
+ArticleGroup "1" *-- "0..n" FieldDefinition: ArticleFields
+ArticleGroup "1" *-- "0..n" FieldDefinition: InventoryItemFields
+
+Article "0..n" o-- "1" ArticleGroup
+Article "1" *-- "0..n" FieldValue
+
+Inventory "1" o-- "0..n" InventoryItem
+InventoryItem "1" *-- "0..n" FieldValue
+
+Inventory "0..n" -- "1" ArticleGroup
+Article -- InventoryItem
+FieldDefinition -- FieldValue
+
+Article <|-- HouseholdArticle
+InventoryItem <|-- HouseholdInvenoryItem
+
+@enduml
