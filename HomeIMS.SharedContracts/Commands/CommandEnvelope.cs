@@ -12,12 +12,13 @@ public class CommandEnvelope
     [JsonIgnore]
     public Type CommandType => Type.GetType(CommandTypeName) ?? throw new Exception("Command type not found");
 
-    public static CommandEnvelope CreateEnvelope(Command command)
+    public static CommandEnvelope CreateEnvelope<TCommand>(TCommand command)
+        where TCommand : Command
     {
         var createdEnvelope = new CommandEnvelope
         {
             CommandTypeName = command.GetType().FullName,
-            SerializedCommand = JsonSerializer.Serialize(command)
+            SerializedCommand = JsonSerializer.Serialize(command, typeof(TCommand))
         };
 
         return createdEnvelope;

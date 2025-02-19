@@ -9,11 +9,13 @@ public class CommandRouter
         switch (command.Type)
         {
             case CommandType.IncrementCounter:
-                var handler = serviceProvider.GetRequiredService<IncrementCounterCommandHandler>();
-                await handler.Handle((IncrementCounterCommand)command);
+                await serviceProvider.GetRequiredService<IncrementCounterCommandHandler>().Handle((IncrementCounterCommand)command);
+                break;
+            case CommandType.CreateHouseholdArticle:
+                await serviceProvider.GetRequiredService<CreateHouseholdArticleCommandHandler>().Handle((CreateHouseholdArticleCommand)command);
                 break;
             default:
-                throw new NotImplementedException($"Command type '{command.Type}' is not implemented.");
+                throw new NotImplementedException($"There is no handler routing available for command type '{command.Type}'.");
         }
     }
 }

@@ -17,6 +17,7 @@ public class Program
         builder.Services.AddAuthorization();
         builder.Services.AddSingleton<CommandRouter>();
         builder.Services.AddSingleton<IncrementCounterCommandHandler>();
+        builder.Services.AddSingleton<CreateHouseholdArticleCommandHandler>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

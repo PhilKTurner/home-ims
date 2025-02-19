@@ -1,0 +1,40 @@
+@page "/article-test"
+
+@using System.Text
+@using System.Text.Json
+@using HomeIMS.SharedContracts.Commands
+
+@inject HttpClient HttpClient
+
+<PageTitle>ArticleTest</PageTitle>
+
+<h1>ArticleTest</h1>
+
+<EditForm Model="@creationCommand" OnValidSubmit="@CreateArticle">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Name:</label>
+        <InputText id="name" @bind-Value="creationCommand.Name" />
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        <InputText id="description" @bind-Value="creationCommand.Description" />
+    </div>
+
+    <button type="submit">Create Article</button>
+</EditForm>
+
+@code {
+    private CreateHouseholdArticleCommand creationCommand = new CreateHouseholdArticleCommand() {Id = Guid.NewGuid()};
+
+    private async Task CreateArticle()
+    {        
+        var commandEnvelope = CommandEnvelope.CreateEnvelope(creationCommand);
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+        
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+        var response = await HttpClient.PostAsync("command", content);
+    }
+}
