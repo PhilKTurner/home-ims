@@ -7,9 +7,13 @@ services:
     container_name: hims-server
     depends_on:
       - eventstore
+      - db
     ports:
       - 80:80
       - 443:443
+    secrets:
+      - hims-mariadb-rootpw
+      - hims-mariadb-pw
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx

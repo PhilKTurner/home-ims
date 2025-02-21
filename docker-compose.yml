@@ -7,8 +7,8 @@ volumes:
   eventstore-logs:
     name: hims-eventstore-logs
     driver: local
-  read-model-data:
-    name: hims-read-model-data
+  db-data:
+    name: hims-db-data
     driver: local
 
 secrets:
@@ -39,8 +39,8 @@ services:
         source: eventstore-logs
         target: /var/log/eventstore
 
-  readmodeldb:
-    image: mariadb:11.5.2
+  db:
+    image: mariadb:11.7.2
     container_name: hims-db
     restart: unless-stopped
     #networks:
@@ -50,8 +50,8 @@ services:
       - hims-mariadb-pw
     environment:
       - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/hims-mariadb-rootpw
-      - MARIADB_DATABASE=hims-db
-      - MARIADB_USER=hims
+      - MARIADB_DATABASE=IdentityStore
+      - MARIADB_USER=hims-identity
       - MARIADB_PASSWORD_FILE=/run/secrets/hims-mariadb-pw
     volumes:
-      - read-model-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
