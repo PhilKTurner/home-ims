@@ -13,6 +13,7 @@ services:
       - 5001:443
       - 9229:9229 # Expose the debugging port
     secrets:
+      - hims-root-pw
       - hims-mariadb-rootpw
       - hims-mariadb-pw
     environment:

@@ -114,7 +114,7 @@ public class Program
         if (builder.Environment.IsDevelopment())
         {
             await using var scope = app.Services.CreateAsyncScope();
-            await SeedData.InitializeAsync(scope.ServiceProvider);
+            await IdentitySeedData.InitializeAsync(scope.ServiceProvider);
         }
 
         // TODO move to controller

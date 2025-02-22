@@ -12,6 +12,7 @@ services:
       - 80:80
       - 443:443
     secrets:
+      - hims-root-pw
       - hims-mariadb-rootpw
       - hims-mariadb-pw
     environment:

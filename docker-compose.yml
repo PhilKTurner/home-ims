@@ -12,6 +12,8 @@ volumes:
     driver: local
 
 secrets:
+  hims-root-pw:
+    file: ./.secrets/hims-root-pw
   hims-mariadb-rootpw:
     file: ./.secrets/hims-mariadb-rootpw
   hims-mariadb-pw:
