@@ -101,7 +101,7 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.MapIdentityApi<HimsUser>();
+        app.MapCustomIdentityApi<HimsUser>();
 
         app.UseCors("wasm");
 

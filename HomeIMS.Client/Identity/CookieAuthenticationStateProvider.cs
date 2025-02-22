@@ -44,10 +44,10 @@ namespace BlazorWasmAuth.Identity
         /// <summary>
         /// User login.
         /// </summary>
-        /// <param name="email">The user's email address.</param>
+        /// <param name="userName">The user's name.</param>
         /// <param name="password">The user's password.</param>
         /// <returns>The result of the login request serialized to a <see cref="FormResult"/>.</returns>
-        public async Task<FormResult> LoginAsync(string email, string password)
+        public async Task<FormResult> LoginAsync(string userName, string password)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace BlazorWasmAuth.Identity
                 var result = await httpClient.PostAsJsonAsync(
                     "login?useCookies=true", new
                     {
-                        email,
+                        userName,
                         password
                     });
 
@@ -114,8 +114,7 @@ namespace BlazorWasmAuth.Identity
                     // in this example app, name and email are the same
                     var claims = new List<Claim>
                     {
-                        new(ClaimTypes.Name, userInfo.Email),
-                        new(ClaimTypes.Email, userInfo.Email),
+                        new(ClaimTypes.Name, userInfo.UserName)
                     };
 
                     // add any additional claims

@@ -27,16 +27,16 @@
                         <h2>Use a local account to log in.</h2>
                         <hr />
                         <div class="form-floating mb-3">
-                            <InputText @bind-Value="Input.Email"
-                                       id="Input.Email"
+                            <InputText @bind-Value="Input.UserName"
+                                       id="Input.UserName"
                                        class="form-control"
                                        autocomplete="username"
                                        aria-required="true"
-                                       placeholder="name@example.com" />
+                                       placeholder="user name" />
                             <label for="Input.Email" class="form-label">
-                                Email
+                                User name
                             </label>
-                            <ValidationMessage For="() => Input.Email"
+                            <ValidationMessage For="() => Input.UserName"
                                                class="text-danger" />
                         </div>
                         <div class="form-floating mb-3">
@@ -81,7 +81,7 @@
 
     public async Task LoginUserAsync()
     {
-        formResult = await Acct.LoginAsync(Input.Email, Input.Password);
+        formResult = await Acct.LoginAsync(Input.UserName, Input.Password);
 
         if (formResult.Succeeded && !string.IsNullOrEmpty(ReturnUrl))
         {
@@ -92,8 +92,8 @@
     private sealed class InputModel
     {
         [Required]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = string.Empty;
+        [Display(Name = "User name")]
+        public string UserName { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
