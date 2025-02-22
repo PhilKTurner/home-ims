@@ -1,18 +1,19 @@
-﻿namespace BlazorWasmAuth.Identity.Models
+﻿namespace HomeIMS.Client.Identity;
+
+// source: https://github.com/dotnet/blazor-samples/tree/main/8.0/BlazorWebAssemblyStandaloneWithIdentity
+
+/// <summary>
+/// Response for login and registration.
+/// </summary>
+public class FormResult
 {
     /// <summary>
-    /// Response for login and registration.
+    /// Gets or sets a value indicating whether the action was successful.
     /// </summary>
-    public class FormResult
-    {
-        /// <summary>
-        /// Gets or sets a value indicating whether the action was successful.
-        /// </summary>
-        public bool Succeeded { get; set; }
+    public bool Succeeded { get; set; }
 
-        /// <summary>
-        /// On failure, the problem details are parsed and returned in this array.
-        /// </summary>
-        public string[] ErrorList { get; set; } = [];
-    }
+    /// <summary>
+    /// On failure, the problem details are parsed and returned in this array.
+    /// </summary>
+    public string[] ErrorList { get; set; } = [];
 }

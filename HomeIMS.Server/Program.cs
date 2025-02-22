@@ -1,7 +1,6 @@
 using System.Data.Common;
 using System.Security.Claims;
 using System.Text.Json;
-using Backend;
 using EventStore.Client;
 using HomeIMS.Server.CommandHandling;
 using HomeIMS.Server.Database;
