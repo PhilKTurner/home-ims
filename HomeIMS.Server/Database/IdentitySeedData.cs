@@ -41,7 +41,7 @@ public class IdentitySeedData
 
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-        var hashedRootPassword = password.HashPassword(rootUser, configuration["hims-root-pw"] ?? "");
+        var hashedRootPassword = password.HashPassword(rootUser, configuration["hims-rootpw"] ?? "");
         rootUser.PasswordHash = hashedRootPassword;
 
         using var userManager = serviceProvider.GetRequiredService<UserManager<HimsUser>>();

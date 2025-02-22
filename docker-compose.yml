@@ -12,12 +12,12 @@ volumes:
     driver: local
 
 secrets:
-  hims-root-pw:
-    file: ./.secrets/hims-root-pw
-  hims-mariadb-rootpw:
-    file: ./.secrets/hims-mariadb-rootpw
-  hims-mariadb-pw:
-    file: ./.secrets/hims-mariadb-pw
+  hims-rootpw:
+    file: ./.secrets/hims-rootpw
+  hims-db-rootpw:
+    file: ./.secrets/hims-db-rootpw
+  hims-db-userpw:
+    file: ./.secrets/hims-db-userpw
 
 services:
   eventstore:
@@ -48,12 +48,12 @@ services:
     #networks:
     #  - dbaccess
     secrets:
-      - hims-mariadb-rootpw
-      - hims-mariadb-pw
+      - hims-db-rootpw
+      - hims-db-userpw
     environment:
-      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/hims-mariadb-rootpw
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/hims-db-rootpw
       - MARIADB_DATABASE=IdentityStore
       - MARIADB_USER=hims-identity
-      - MARIADB_PASSWORD_FILE=/run/secrets/hims-mariadb-pw
+      - MARIADB_PASSWORD_FILE=/run/secrets/hims-db-userpw
     volumes:
       - db-data:/var/lib/mysql

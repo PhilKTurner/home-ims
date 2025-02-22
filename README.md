@@ -4,18 +4,14 @@ Simple *Inventory Management System* for home usage.
 
 ## Getting Started (kind of)
 
-Provide passwords used to setup the MariaDB container as UTF-8 text files in ./.secrets
+Provide passwords as UTF-8 text files in ./.secrets in the local repository:
 
-- hims-mariadb-pw
-- hims-mariadb-rootpw
+- hims-rootpw
+- hims-db-rootpw
+- hims-db-userpw
 
-Build image for build environment:
-```
-docker build -f build-env.dockerfile -t hims-build-env .
-```
-
-Build images and run containers for application and backend:
+Build images and run containers:
 
 ```
-docker-compose --profile backend --profile app up -d
+docker-compose up --build --detach
 ```

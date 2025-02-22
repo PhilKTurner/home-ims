@@ -13,9 +13,9 @@ services:
       - 5001:443
       - 9229:9229 # Expose the debugging port
     secrets:
-      - hims-root-pw
-      - hims-mariadb-rootpw
-      - hims-mariadb-pw
+      - hims-rootpw
+      - hims-db-rootpw
+      - hims-db-userpw
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx

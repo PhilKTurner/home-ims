@@ -26,7 +26,7 @@ public class Program
         if (Directory.Exists("/run/secrets"))
         {
             builder.Configuration.AddKeyPerFile("/run/secrets");
-            connectionStringBuilder.Add("Password", builder.Configuration["hims-mariadb-pw"] ?? string.Empty);
+            connectionStringBuilder.Add("Password", builder.Configuration["hims-db-userpw"] ?? string.Empty);
         }
         else if (builder.Environment.IsDevelopment())
         {
