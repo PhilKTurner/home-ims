@@ -456,3 +456,7 @@ $RECYCLE.BIN/
 
 # custom secret folder
 .secrets/*
+
+# SASS transpiler artifacts
+*.razor.css
+*.razor.css.map
