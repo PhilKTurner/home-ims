@@ -1,0 +1,27 @@
+@using HomeIMS.Client.Components
+
+<MudAppBar>
+    <AuthorizeView>
+        <Authorized>
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                OnClick="@((e) => DrawerToggle())" />
+        </Authorized>
+    </AuthorizeView>
+    My Application
+    <MudSpacer />
+    <UserAppBarWidget />
+</MudAppBar>
+
+@code {
+    [Parameter]
+    public bool DrawerOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> DrawerOpenChanged { get; set; }
+
+    void DrawerToggle()
+    {
+        DrawerOpen = !DrawerOpen;
+        DrawerOpenChanged.InvokeAsync(DrawerOpen);
+    }
+}

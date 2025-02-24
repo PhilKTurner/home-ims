@@ -1,0 +1,59 @@
+@page "/login"
+
+@using System.ComponentModel.DataAnnotations
+@using HomeIMS.Client.Identity
+
+@inject IAccountManagement Acct
+@inject NavigationManager Navigation
+
+@* based on: https://github.com/dotnet/blazor-samples/tree/main/8.0/BlazorWebAssemblyStandaloneWithIdentity *@
+
+<PageTitle>Login</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+<AuthorizeView>
+    <Authorized>
+        Logged in as @context.User.Identity?.Name.
+    </Authorized>
+    <NotAuthorized>
+        <EditForm Model="Input" OnValidSubmit="LoginUserAsync" Context="editform_context">
+            <DataAnnotationsValidator />
+            <MudTextField T="string" Label="Username" @bind-Value="Input.UserName" Required="true" RequiredError="User name is required!" aria-required="true" />
+            <MudTextField T="string" Label="Password" @bind-Value="Input.Password" InputType="InputType.Password" Required="true" RequiredError="Password is required!" aria-required="true" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false">
+                Log in
+            </MudButton>
+        </EditForm>
+    </NotAuthorized>
+</AuthorizeView>
+</MudContainer>
+
+@code {
+    private FormResult formResult = new();
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    public async Task LoginUserAsync()
+    {
+        formResult = await Acct.LoginAsync(Input.UserName, Input.Password);
+
+        if (formResult.Succeeded && !string.IsNullOrEmpty(ReturnUrl))
+        {
+            Navigation.NavigateTo(ReturnUrl);
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+    }
+}

@@ -1,8 +1,11 @@
 @page "/logout"
 
+@using HomeIMS.Client.Identity
+
+@inject NavigationManager Navigation
 @inject IAccountManagement Acct
 
-@* source: https://github.com/dotnet/blazor-samples/tree/main/8.0/BlazorWebAssemblyStandaloneWithIdentity *@
+@* based on: https://github.com/dotnet/blazor-samples/tree/main/8.0/BlazorWebAssemblyStandaloneWithIdentity *@
 
 <PageTitle>Logout</PageTitle>
 
@@ -25,6 +28,7 @@
         if (await Acct.CheckAuthenticatedAsync())
         {
             await Acct.LogoutAsync();
+            Navigation.NavigateTo("/");
         }
     }
 }
