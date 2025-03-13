@@ -1,8 +1,21 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/article" Match="NavLinkMatch.Prefix">ArticleEditor</MudNavLink>
-    <MudNavGroup Title="Settings" Expanded="true">
-        <MudNavLink Href="/users"  Match="NavLinkMatch.Prefix">Users</MudNavLink>
+    <MudNavGroup Title="Inventories" Expanded="true">
+        <MudNavLink Href="/inventories" Match="NavLinkMatch.Prefix">Manage</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix">Inventory 1</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix">Inventory 2</MudNavLink>
+        <MudNavLink Match="NavLinkMatch.Prefix">Inventory 3</MudNavLink>
     </MudNavGroup>
-    <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
+    <MudNavGroup Title="Article Groups" Expanded="true">
+        <MudNavLink Href="/article-groups" Match="NavLinkMatch.Prefix">Overview</MudNavLink>
+        <MudNavLink Href="/article-group" Match="NavLinkMatch.Prefix">Add</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Articles" Expanded="true">
+        <MudNavLink Href="/articles" Match="NavLinkMatch.Prefix">Overview</MudNavLink>
+        <MudNavLink Href="/article" Match="NavLinkMatch.Prefix">Add</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Settings" Expanded="true">
+        <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
+    </MudNavGroup>
+    <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
 </MudNavMenu>
