@@ -1,11 +1,17 @@
 using System.Data.Common;
 using System.Security.Claims;
 using System.Text.Json;
-using EventStore.Client;
 using HomeIMS.Server.CommandHandling;
 using HomeIMS.Server.Database;
+using HomeIMS.Server.EventStore;
+using HomeIMS.Server.EventStore.Aggregators;
 using HomeIMS.Server.Identity;
 using HomeIMS.SharedContracts.Commands;
+using HomeIMS.SharedContracts.Domain.Articles;
+using HomeIMS.SharedContracts.Domain.Articles.Commands;
+using HomeIMS.SharedContracts.EventSourcing;
+using Marten;
+using Marten.Events.Projections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,17 +26,21 @@ public class Program
 
         var dbServerVersion = new MariaDbServerVersion(new Version(11, 7, 2));
 
-        var connectionStringBuilder = new DbConnectionStringBuilder();
-        connectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionString("HimsIdentityDatabase");
+        var eventStoreConnectionStringBuilder = new DbConnectionStringBuilder();
+        eventStoreConnectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionString("HimsEventStore");
+
+        var identityConnectionStringBuilder = new DbConnectionStringBuilder();
+        identityConnectionStringBuilder.ConnectionString = builder.Configuration.GetConnectionString("HimsIdentityDatabase");
 
         if (Directory.Exists("/run/secrets"))
         {
             builder.Configuration.AddKeyPerFile("/run/secrets");
-            connectionStringBuilder.Add("Password", builder.Configuration["hims-db-userpw"] ?? string.Empty);
+            eventStoreConnectionStringBuilder.Add("Password", builder.Configuration["hims-eventstore-rootpw"] ?? string.Empty);
+            identityConnectionStringBuilder.Add("Password", builder.Configuration["hims-db-userpw"] ?? string.Empty);
         }
         else if (builder.Environment.IsDevelopment())
         {
-            connectionStringBuilder.Add("Password", builder.Configuration["HimsIdentityDatabase:Password"] ?? string.Empty);
+            identityConnectionStringBuilder.Add("Password", builder.Configuration["HimsIdentityDatabase:Password"] ?? string.Empty);
         }
         else
         {
@@ -59,7 +69,7 @@ public class Program
 
         builder.Services.AddDbContext<IdentityContext>(
             dbContextOptions => dbContextOptions
-                .UseMySql(connectionStringBuilder.ConnectionString, dbServerVersion, mySqlOptions => mySqlOptions.EnableRetryOnFailure())
+                .UseMySql(identityConnectionStringBuilder.ConnectionString, dbServerVersion, mySqlOptions => mySqlOptions.EnableRetryOnFailure())
                 // The following three options help with debugging, but should
                 // be changed or removed for production.
                 .LogTo(Console.WriteLine, LogLevel.Information)
@@ -83,9 +93,20 @@ public class Program
             )
         );
 
-        builder.Services.AddSingleton<CommandRouter>();
-        builder.Services.AddSingleton<IncrementCounterCommandHandler>();
-        builder.Services.AddSingleton<CreateHouseholdArticleCommandHandler>();
+        builder.Services.AddMarten(options =>
+        {
+            options.Connection(eventStoreConnectionStringBuilder.ConnectionString);
+            options.UseSystemTextJsonForSerialization();
+
+            options.Projections.Snapshot<ArticleAggregator>(SnapshotLifecycle.Inline, projectionOptions => projectionOptions.ProjectionName = "Articles");
+        });
+
+        builder.Services.AddScoped<IEventStore, MartenEventStore>();
+        builder.Services.AddScoped<IReadModelAccess<ArticleAggregator>, SimpleMartenReadModelAccessor<ArticleAggregator>>();
+
+        builder.Services.AddScoped<CommandRouter>();
+        builder.Services.AddScoped<ICommandHandler<CreateArticle, Article>, CreateArticleHandler>();
+        builder.Services.AddScoped<ICommandHandler<UpdateArticle, Article>, UpdateArticleHandler>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -163,7 +184,7 @@ public class Program
                 var command = commandEnvelope.Deserialize();
 
                 var commandRouter = httpContext.RequestServices.GetRequiredService<CommandRouter>();
-                await commandRouter.Handle(httpContext.RequestServices, command);
+                await commandRouter.Handle(command);
             }
             catch (System.Exception)
             {
@@ -175,20 +196,20 @@ public class Program
         .WithName("PostCommand")
         .WithOpenApi();
 
-        app.MapGet("/counter", async (HttpContext httpContext) =>
+        app.MapGet("/article/{id:guid}", async (HttpContext httpContext, Guid id) =>
         {
-            const string connectionString = "esdb://hims-eventstore:2113?tls=false&tlsVerifyCert=false";
-            var settings = EventStoreClientSettings.Create(connectionString);
-            var client = new EventStoreClient(settings);
+            var readModelAccessor = httpContext.RequestServices.GetRequiredService<IReadModelAccess<ArticleAggregator>>();
 
-            var counterEvents = client.ReadStreamAsync(Direction.Backwards, "counter-stream", StreamPosition.End);
+            var readResult = await readModelAccessor.GetById(id);
 
-            if (await counterEvents.ReadState == ReadState.StreamNotFound)
-                return Results.Ok(0);
-
-            var counterEventCount = await counterEvents.CountAsync();
-
-            return Results.Ok(counterEventCount);
+            if (readResult.IsSuccess)
+            {
+                return Results.Ok(readResult.Value?.Aggregate);
+            }
+            else
+            {
+                return Results.Problem(readResult.Errors.First().Message);
+            }
         });
 
         // Set up hosting of client WebAssembly app

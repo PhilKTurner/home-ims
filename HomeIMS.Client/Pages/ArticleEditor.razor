@@ -1,0 +1,117 @@
+@page "/article/{id:guid?}"
+
+@using HomeIMS.SharedContracts.Commands
+@using HomeIMS.SharedContracts.Domain.Articles
+@using HomeIMS.SharedContracts.Domain.Articles.Commands
+@using System.Text.Json
+@using System.Text
+
+@inject HttpClient HttpClient
+
+<PageTitle>ArticleEditor</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <AuthorizeView>
+        <Authorized>
+            @if (model is not null)
+            {
+                <EditForm Model="model" OnValidSubmit="Submit" Context="editform_context">
+                    <DataAnnotationsValidator />
+                    <MudTextField T="string" Label="Name" @bind-Value="model.Name" Required="true" />
+                    <MudTextField T="string" Label="Description" @bind-Value="model.Description" />
+
+                    @if (IsCreation)
+                    {
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                            DropShadow="false">
+                            Create
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudStack Row="true">
+                            <MudButton OnClick="ToggleEditMode">@(IsEditModeActive ? "Undo" : "Edit")</MudButton>
+                            @if (IsEditModeActive)
+                            {
+                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                                    DropShadow="false">
+                                    Update
+                                </MudButton>
+                            }
+                        </MudStack>
+                    }
+                </EditForm>
+            }
+            else
+            {
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            }
+        </Authorized>
+        <NotAuthorized>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    public bool IsCreation => Id is null;
+    public bool IsEditModeActive => originalModel is not null;
+
+    private IArticle? model = null;
+    private IArticle? originalModel = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            model = await HttpClient.GetFromJsonAsync<Article>($"article/{Id}");
+        }
+        else
+        {
+            model = new CreateArticle();
+        }
+    }
+
+    public void ToggleEditMode()
+    {
+        if (!IsEditModeActive)
+        {
+            originalModel = model;
+            model = new UpdateArticle((Article)model);
+        }
+        else
+        {
+            model = originalModel;
+            originalModel = null;
+        }
+    }
+
+    public async Task Submit()
+    {
+        var commandEnvelope = default(CommandEnvelope);
+
+        if (IsCreation)
+        {
+            var command = model as CreateArticle;
+            if (command is null)
+                throw new InvalidOperationException("Invalid model type");
+
+            commandEnvelope = CommandEnvelope.CreateEnvelope(command);
+        }
+        else
+        {
+            var command = model as UpdateArticle;
+            if (command is null)
+                throw new InvalidOperationException("Invalid model type");
+
+            commandEnvelope = CommandEnvelope.CreateEnvelope(command);
+        }
+        
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+        var response = await HttpClient.PostAsync("command", content);
+    }
+}

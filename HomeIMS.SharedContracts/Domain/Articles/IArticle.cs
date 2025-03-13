@@ -1,8 +1,7 @@
-namespace HomeIMS.SharedContracts.Domain;
+namespace HomeIMS.SharedContracts.Domain.Articles;
 
 public interface IArticle
 {
-    Guid Id { get; set; }
     Guid? GroupId { get; set; }
 
     string? Name { get; set; }

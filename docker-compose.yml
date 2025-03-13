@@ -4,9 +4,6 @@ volumes:
   eventstore-data:
     name: hims-eventstore-data
     driver: local
-  eventstore-logs:
-    name: hims-eventstore-logs
-    driver: local
   db-data:
     name: hims-db-data
     driver: local
@@ -14,6 +11,8 @@ volumes:
 secrets:
   hims-rootpw:
     file: ./.secrets/hims-rootpw
+  hims-eventstore-rootpw:
+    file: ./.secrets/hims-eventstore-rootpw
   hims-db-rootpw:
     file: ./.secrets/hims-db-rootpw
   hims-db-userpw:
@@ -21,25 +20,17 @@ secrets:
 
 services:
   eventstore:
-    image: eventstore/eventstore:24.2.0-jammy
+    image: postgres:17.4
     container_name: hims-eventstore
+    secrets:
+      - hims-eventstore-rootpw
     environment:
-      - EVENTSTORE_CLUSTER_SIZE=1
-      - EVENTSTORE_RUN_PROJECTIONS=All
-      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
-      - EVENTSTORE_HTTP_PORT=2113
-      - EVENTSTORE_INSECURE=true
-      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
-      - EVENTSTORE_ALLOW_ANONYMOUS_STREAM_ACCESS=true
-    ports:
-      - "2113:2113"
+      - POSTGRES_USER=hims-eventstore
+      - POSTGRES_PASSWORD_FILE=/run/secrets/hims-eventstore-rootpw
     volumes:
       - type: volume
         source: eventstore-data
-        target: /var/lib/eventstore
-      - type: volume
-        source: eventstore-logs
-        target: /var/log/eventstore
+        target: /var/lib/postgresql/data
 
   db:
     image: mariadb:11.7.2
