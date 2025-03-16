@@ -11,6 +11,8 @@ public class CreateArticleHandler : ICommandHandler<CreateArticle, Article>
 {
     public Result<IEnumerable<HimsEvent>> Decide(CreateArticle command, Article? state)
     {
+        ArgumentNullException.ThrowIfNull(command);
+
         var creationEvent = new ArticleCreated
         {
             ArticleGroupId = command.ArticleGroupId,
