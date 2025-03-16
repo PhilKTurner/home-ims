@@ -52,6 +52,12 @@
     </AuthorizeView>
 </MudContainer>
 
+<MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+    <MudSpacer />
+    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Check" />
+</MudContextualActionBar>
+
 @code {
     [Parameter]
     public Guid? Id { get; set; }

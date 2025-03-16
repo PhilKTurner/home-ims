@@ -1,0 +1,62 @@
+@page "/inventory/{id:guid?}" // TODO ID not optional
+
+@using System.Net.Http.Json
+
+<PageTitle>Inventory @Id</PageTitle>
+
+<MudDataGrid T="IInventory" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true">
+    <ToolBarContent>
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="IInventory" />
+        <PropertyColumn Property="x => x.Id" />
+        <PropertyColumn Property="x => x.Name" SortBy="@_sortBy" />
+        <PropertyColumn Property="x => x.Description" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="IInventory" />
+    </PagerContent>
+</MudDataGrid>
+
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Value="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private IEnumerable<IInventory> Elements = new List<IInventory>();
+    private string _searchString;
+    private bool _sortNameByLength;
+
+    // custom sort by name length
+    private Func<IInventory, object> _sortBy => x =>
+    {
+        if (_sortNameByLength)
+            return x.Name.Length;
+        else
+            return x.Name;
+    };
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<IInventory, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Id} {x.Name} {x.Description}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    @* protected override async Task OnInitializedAsync()
+    {
+        Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+    } *@
+}

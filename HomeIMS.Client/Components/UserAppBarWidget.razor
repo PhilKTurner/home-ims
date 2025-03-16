@@ -1,11 +1,12 @@
 ﻿<AuthorizeView>
     <Authorized>
-        <MudButton Href="logout" Variant="Variant.Outlined" Color="Color.Secondary">
+        <MudButton Href="logout" Variant="Variant.Outlined" Color="Color.Tertiary">
             Logout
         </MudButton>
+        <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Person" />
     </Authorized>
     <NotAuthorized>
-        <MudButton Href="login" Variant="Variant.Filled" Color="Color.Secondary">
+        <MudButton Href="login" Variant="Variant.Filled" Color="Color.Tertiary">
             Login
         </MudButton>
     </NotAuthorized>

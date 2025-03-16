@@ -1,0 +1,39 @@
+@page "/article-groups"
+
+@using System.Net.Http.Json
+@using HomeIMS.SharedContracts.Domain
+
+<PageTitle>Article Group Overview</PageTitle>
+
+<MudDataGrid T="ArticleGroup" MultiSelection="true" Items="@Elements" EditMode="DataGridEditMode.Form" Filterable="true"
+    Hideable="true" RowClick="@RowClicked">
+    <Columns>
+        <SelectColumn T="ArticleGroup" />
+        <PropertyColumn Property="x => x.Id" Sortable="false" Editable="false" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Description" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ArticleGroup" />
+    </PagerContent>
+</MudDataGrid>
+
+<MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+    <MudSpacer />
+    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Href="/article-group"/>
+</MudContextualActionBar>
+
+@code {
+    private IEnumerable<ArticleGroup> Elements = new List<ArticleGroup>();
+
+    @* protected override async Task OnInitializedAsync()
+    {
+        Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+    } *@
+
+    // events
+    void RowClicked(DataGridRowClickEventArgs<ArticleGroup> args)
+    {
+    }
+}

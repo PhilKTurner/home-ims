@@ -1,0 +1,49 @@
+@page "/articles"
+
+@using System.Net.Http.Json
+@using HomeIMS.SharedContracts.Domain.Articles
+
+<PageTitle>Article Overview</PageTitle>
+
+<MudDataGrid Items="@Elements" EditMode="DataGridEditMode.Form" Filterable="true" FilterMode="DataGridFilterMode.Simple" QuickFilter="@_quickFilter">
+        <ToolBarContent>
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Editable="false" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Description" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Article" />
+    </PagerContent>
+</MudDataGrid>
+
+<MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+    <MudSpacer />
+    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Href="/article"/>
+</MudContextualActionBar>
+
+@code {
+    IEnumerable<Article> Elements = new List<Article>();
+    private string _searchString;
+
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<Article, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    @* protected override async Task OnInitializedAsync()
+    {
+        Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+    } *@
+}

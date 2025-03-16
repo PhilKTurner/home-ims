@@ -3,7 +3,7 @@
 @inherits LayoutComponentBase
 
 <MudLayout>
-    <AppBar @bind-DrawerOpen="@_drawerOpen" />
+    <TopAppBar @bind-DrawerOpen="@_drawerOpen" />
     <AuthorizeView>
         <Authorized>
             <MudDrawer @bind-Open="@_drawerOpen">
@@ -12,6 +12,7 @@
             <MudMainContent>
                 @Body
             </MudMainContent>
+            <BottomAppBar />
         </Authorized>
         <NotAuthorized>
             <MudMainContent>
