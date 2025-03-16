@@ -1,6 +1,6 @@
-namespace HomeIMS.SharedContracts.Domain.Articles;
+namespace HomeIMS.SharedContracts.Domain.Inventories;
 
-public class Article : IArticle, IIdentifiableEntity
+public class Inventory : IInventory, IIdentifiableEntity
 {
     public Guid Id { get; set; }
 

@@ -50,7 +50,6 @@ class HouseholdArticle {
 
 class Inventory {
   +id: Guid
-  +articleGroupId: Guid
   +name: string
   +description: string
 }

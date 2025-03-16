@@ -24,8 +24,8 @@ public class UpdateArticleHandler : ICommandHandler<UpdateArticle, Article>
 
         var modificationEvent = new ArticleModified(command.Id);
 
-        if (command.GroupId.HasValue && command.GroupId.Value != state.GroupId)
-            modificationEvent.GroupId = command.GroupId.Value;
+        if (command.ArticleGroupId.HasValue && command.ArticleGroupId.Value != state.ArticleGroupId)
+            modificationEvent.ArticleGroupId = command.ArticleGroupId.Value;
 
         if (!string.IsNullOrWhiteSpace(command.Name) && command.Name != state.Name)
             modificationEvent.Name = command.Name;

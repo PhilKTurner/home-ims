@@ -13,7 +13,7 @@ public class CreateArticleHandler : ICommandHandler<CreateArticle, Article>
     {
         var creationEvent = new ArticleCreated
         {
-            GroupId = command.GroupId,
+            ArticleGroupId = command.ArticleGroupId,
             Name = command.Name,
             Description = command.Description
         };

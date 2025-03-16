@@ -1,22 +1,23 @@
 @page "/inventory/{id:guid?}" // TODO ID not optional
 
 @using System.Net.Http.Json
+@using HomeIMS.SharedContracts.Domain.Inventories
 
 <PageTitle>Inventory @Id</PageTitle>
 
-<MudDataGrid T="IInventory" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true">
+<MudDataGrid T="Inventory" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" Hideable="true">
     <ToolBarContent>
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
             AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="IInventory" />
+        <SelectColumn T="Inventory" />
         <PropertyColumn Property="x => x.Id" />
         <PropertyColumn Property="x => x.Name" SortBy="@_sortBy" />
         <PropertyColumn Property="x => x.Description" />
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="IInventory" />
+        <MudDataGridPager T="Inventory" />
     </PagerContent>
 </MudDataGrid>
 
@@ -28,12 +29,12 @@
     [Parameter]
     public Guid? Id { get; set; }
 
-    private IEnumerable<IInventory> Elements = new List<IInventory>();
+    private IEnumerable<Inventory> Elements = new List<Inventory>();
     private string _searchString;
     private bool _sortNameByLength;
 
     // custom sort by name length
-    private Func<IInventory, object> _sortBy => x =>
+    private Func<Inventory, object> _sortBy => x =>
     {
         if (_sortNameByLength)
             return x.Name.Length;
@@ -41,7 +42,7 @@
             return x.Name;
     };
     // quick filter - filter globally across multiple columns with the same input
-    private Func<IInventory, bool> _quickFilter => x =>
+    private Func<Inventory, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;

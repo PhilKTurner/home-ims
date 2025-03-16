@@ -13,14 +13,14 @@ public class ArticleAggregator : Article, IEventAggregator<Article>
     public void Apply(ArticleCreated @event)
     {
         Id = @event.StreamId;
-        GroupId = @event.GroupId;
+        ArticleGroupId = @event.ArticleGroupId;
         Name = @event.Name;
         Description = @event.Description;
     }
 
     public void Apply(ArticleModified @event)
     {
-        GroupId = @event.GroupId ?? GroupId;
+        ArticleGroupId = @event.ArticleGroupId ?? ArticleGroupId;
         Name = @event.Name ?? Name;
         Description = @event.Description ?? Description;
     }

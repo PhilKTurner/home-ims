@@ -8,7 +8,7 @@ public class ArticleModified : HimsEvent, IArticle
     {
     }
 
-    public Guid? GroupId { get; set;}
+    public Guid? ArticleGroupId { get; set;}
 
     public string? Name { get; set; }
     public string? Description { get; set; }

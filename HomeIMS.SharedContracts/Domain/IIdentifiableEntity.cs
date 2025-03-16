@@ -1,6 +1,6 @@
 namespace HomeIMS.SharedContracts.Domain;
 
-public interface IEntityWithId
+public interface IIdentifiableEntity
 {
     Guid Id { get; }
 }

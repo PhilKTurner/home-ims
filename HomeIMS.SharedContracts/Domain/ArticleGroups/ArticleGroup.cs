@@ -1,6 +1,6 @@
-namespace HomeIMS.SharedContracts.Domain;
+namespace HomeIMS.SharedContracts.Domain.ArticleGroups;
 
-public class ArticleGroup
+public class ArticleGroup : IArticleGroup, IIdentifiableEntity
 {
     public Guid Id { get; set; }
 

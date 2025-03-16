@@ -1,6 +1,7 @@
+namespace HomeIMS.SharedContracts.Domain.Inventories;
+
 public interface IInventory
 {
-    Guid Id { get; }
     Guid? ArticleGroupId { get; set; }
 
     string? Name { get; set; }
