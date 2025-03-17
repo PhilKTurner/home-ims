@@ -9,13 +9,9 @@ USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["HomeIMS.sln", "./"]
-COPY ["HomeIMS.Client/HomeIMS.Client.csproj", "./HomeIMS.Client/"]
-COPY ["HomeIMS.Server/HomeIMS.Server.csproj", "./HomeIMS.Server/"]
-COPY ["HomeIMS.SharedContracts/HomeIMS.SharedContracts.csproj", "./HomeIMS.SharedContracts/"]
-RUN dotnet restore
 COPY . .
 WORKDIR "/src/HomeIMS.Server"
+RUN dotnet restore
 RUN dotnet build "HomeIMS.Server.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
