@@ -160,6 +160,7 @@ public class Program
             
         })
         .WithName("PostCommand")
+        .RequireAuthorization()
         .WithOpenApi();
 
         app.MapGet("/article/{id:guid}", async (HttpContext httpContext, Guid id) =>
@@ -176,7 +177,8 @@ public class Program
             {
                 return Results.Problem(readResult.Errors.First().Message);
             }
-        });
+        })
+        .RequireAuthorization();
 
         // Set up hosting of client WebAssembly app
         app.UseBlazorFrameworkFiles();
