@@ -10,9 +10,9 @@
 
 <PageTitle>ArticleEditor</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
-    <AuthorizeView>
-        <Authorized>
+<AuthorizeView>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Small">
             @if (model is not null)
             {
                 <EditForm Model="model" OnValidSubmit="Submit" Context="editform_context">
@@ -46,11 +46,11 @@
             {
                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
             }
-        </Authorized>
-        <NotAuthorized>
-        </NotAuthorized>
-    </AuthorizeView>
-</MudContainer>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+    </NotAuthorized>
+</AuthorizeView>
 
 <MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
     <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
@@ -114,7 +114,7 @@
 
             commandEnvelope = CommandEnvelope.CreateEnvelope(command);
         }
-        
+
         var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
 
         var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");

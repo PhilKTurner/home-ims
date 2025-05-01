@@ -1,7 +1,11 @@
 using FluentResults;
 using HomeIMS.SharedContracts.Commands;
+using HomeIMS.SharedContracts.Domain.ArticleGroups;
+using HomeIMS.SharedContracts.Domain.ArticleGroups.Commands;
 using HomeIMS.SharedContracts.Domain.Articles;
 using HomeIMS.SharedContracts.Domain.Articles.Commands;
+using HomeIMS.SharedContracts.Domain.Inventories;
+using HomeIMS.SharedContracts.Domain.Inventories.Commands;
 using HomeIMS.SharedContracts.EventSourcing;
 
 namespace HomeIMS.Server.CommandHandling;
@@ -30,6 +34,18 @@ public class CommandRouter
                     break;
                 case UpdateArticle updateArticleCommand:
                     deciderResult = await DecideOnEventsForCommand<UpdateArticle, Article>(updateArticleCommand);
+                    break;
+                case CreateArticleGroup createArticleGroupCommand:
+                    deciderResult = await DecideOnEventsForCommand<CreateArticleGroup, ArticleGroup>(createArticleGroupCommand);
+                    break;
+                case UpdateArticleGroup updateArticleGroupCommand:
+                    deciderResult = await DecideOnEventsForCommand<UpdateArticleGroup, ArticleGroup>(updateArticleGroupCommand);
+                    break;
+                case CreateInventory createInventoryCommand:
+                    deciderResult = await DecideOnEventsForCommand<CreateInventory, Inventory>(createInventoryCommand);
+                    break;
+                case UpdateInventory updateInventoryCommand:
+                    deciderResult = await DecideOnEventsForCommand<UpdateInventory, Inventory>(updateInventoryCommand);
                     break;
                 default:
                     return Result.Fail($"There is no handler routing available for command type '{command.GetType()}'.");

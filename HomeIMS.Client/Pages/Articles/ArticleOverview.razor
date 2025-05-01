@@ -1,33 +1,56 @@
 @page "/articles"
 
 @using System.Net.Http.Json
+@using System.Text.Json
+@using System.Text
+@using HomeIMS.SharedContracts.Commands
+@using HomeIMS.SharedContracts.Domain
 @using HomeIMS.SharedContracts.Domain.Articles
+@using HomeIMS.SharedContracts.Domain.Articles.Commands
+
+@inject HttpClient HttpClient
 
 <PageTitle>Article Overview</PageTitle>
 
-<MudDataGrid Items="@Elements" EditMode="DataGridEditMode.Form" Filterable="true" FilterMode="DataGridFilterMode.Simple" QuickFilter="@_quickFilter">
-        <ToolBarContent>
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Property="x => x.Id" Editable="false" />
-        <PropertyColumn Property="x => x.Name" />
-        <PropertyColumn Property="x => x.Description" />
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="Article" />
-    </PagerContent>
-</MudDataGrid>
+<AuthorizeView>
+    <Authorized>
+        <MudDataGrid T="Article" Items="@Elements" ReadOnly="false" EditMode="DataGridEditMode.Form" Filterable="true"
+            Hideable="true" ShowMenuIcon="true" QuickFilter="@_quickFilter"
+            CommittedItemChanges="OnCommittedItemChanges">
+            <ToolBarContent>
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                    Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+                </MudTextField>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x.Id" Sortable="false" Editable="false" Hidden="true" />
+                <PropertyColumn Property="x => x.Name" />
+                <PropertyColumn Property="x => x.Description" />
+                <TemplateColumn Hideable="false" CellClass="d-flex justify-end">
+                    <CellTemplate Context="cellContext">
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit"
+                            OnClick="@cellContext.Actions.StartEditingItemAsync" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Article" />
+            </PagerContent>
+        </MudDataGrid>
 
-<MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
-    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
-    <MudSpacer />
-    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Href="/article"/>
-</MudContextualActionBar>
+        <MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+            <MudSpacer />
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Href="/article" />
+        </MudContextualActionBar>
+    </Authorized>
+    <NotAuthorized>
+
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    IEnumerable<Article> Elements = new List<Article>();
+    private IEnumerable<Article> Elements = new List<Article>();
     private string _searchString;
 
     // quick filter - filter globally across multiple columns with the same input
@@ -42,8 +65,18 @@
         return false;
     };
 
-    @* protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
-    } *@
+        Elements = await HttpClient.GetFromJsonAsync<List<Article>>("/articles") ?? new List<Article>();
+    }
+
+    private async Task OnCommittedItemChanges(Article changedItem)
+    {
+        var command = new UpdateArticle(changedItem);
+        var commandEnvelope = CommandEnvelope.CreateEnvelope(command);
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+        var response = await HttpClient.PostAsync("command", content);
+    }
 }

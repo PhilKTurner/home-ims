@@ -1,10 +1,10 @@
 using HomeIMS.SharedContracts.EventSourcing;
 
-namespace HomeIMS.SharedContracts.Domain.Articles.Events;
+namespace HomeIMS.SharedContracts.Domain.Inventories.Events;
 
-public class ArticleModified : HimsEvent, IArticle
+public class InventoryModified : HimsEvent, IInventory
 {
-    public ArticleModified(Guid streamId) : base(streamId)
+    public InventoryModified(Guid streamId) : base(streamId)
     {
     }
 

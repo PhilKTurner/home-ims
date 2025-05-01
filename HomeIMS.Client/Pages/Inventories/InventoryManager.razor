@@ -1,3 +1,128 @@
 @page "/inventories"
 
+@using System.Net.Http.Json
+@using HomeIMS.SharedContracts.Commands
+@using HomeIMS.SharedContracts.Domain
+@using HomeIMS.SharedContracts.Domain.ArticleGroups
+@using HomeIMS.SharedContracts.Domain.Inventories
+@using HomeIMS.SharedContracts.Domain.Inventories.Commands
+@using System.Text.Json
+@using System.Text
+@using System.Collections.ObjectModel
+
+@inject HttpClient HttpClient
+
 <PageTitle>Inventories</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <MudDataGrid @ref="dataGrid" T="Inventory" Items="@elements" ReadOnly="false" EditMode="DataGridEditMode.Form" CommittedItemChanges="OnCommittedItemChanges" CanceledEditingItem="OnEditingCanceled">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" />
+                <PropertyColumn Property="x => x.Description" />
+                <PropertyColumn Property="x => x.ArticleGroupId">
+                    <CellTemplate Context="cellContext">
+                        @(GetArticleGroupName(cellContext.Item.ArticleGroupId))
+                    </CellTemplate>
+                    <EditTemplate Context="cellContext">
+                        <MudSelect @bind-Value="cellContext.Item.ArticleGroupId">
+                            <MudSelectItem T="Guid?" Value="null">None</MudSelectItem>
+                            @foreach (var articleGroup in articleGroups)
+                            {
+                                <MudSelectItem T="Guid?" Value="@articleGroup.Id">@articleGroup.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+                <TemplateColumn Hideable="false" CellClass="d-flex justify-end">
+                    <CellTemplate Context="cellContext">
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit"
+                            OnClick="@cellContext.Actions.StartEditingItemAsync" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Inventory" />
+            </PagerContent>
+        </MudDataGrid>
+
+        <MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+            <MudSpacer />
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" OnClick="AddInventory" />
+        </MudContextualActionBar>
+    </Authorized>
+    <NotAuthorized>
+
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private MudDataGrid<Inventory> dataGrid;
+
+    private ObservableCollection<Inventory> elements = new ObservableCollection<Inventory>();
+    private IEnumerable<ArticleGroup> articleGroups = new List<ArticleGroup>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task OnCommittedItemChanges(Inventory changedItem)
+    {
+        if (changedItem is null)
+            return;
+
+        var commandEnvelope = default(CommandEnvelope);
+
+        if (changedItem.Id == Guid.Empty)
+        {
+            var createCommand = new CreateInventory(changedItem);
+            commandEnvelope = CommandEnvelope.CreateEnvelope(createCommand);
+        }
+        else
+        {
+            var updateCommand = new UpdateInventory(changedItem);
+            commandEnvelope = CommandEnvelope.CreateEnvelope(updateCommand);
+        }
+
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+        var response = await HttpClient.PostAsync("command", content);
+
+        await LoadData();
+    }
+
+    private void OnEditingCanceled(Inventory editedItem)
+    {
+        if (editedItem.Id != Guid.Empty)
+            return;
+
+        elements.RemoveAt(elements.Count - 1);
+    }
+
+    private async Task LoadData()
+    {
+        elements = await HttpClient.GetFromJsonAsync<ObservableCollection<Inventory>>("/inventories") ?? new ObservableCollection<Inventory>();
+        articleGroups = await HttpClient.GetFromJsonAsync<List<ArticleGroup>>("/article-groups") ?? new List<ArticleGroup>();
+    }
+
+    private void AddInventory(MouseEventArgs args)
+    {
+        elements.Add(new Inventory());
+
+        var addedInventory = elements.Last();
+        dataGrid.SetEditingItemAsync(addedInventory);
+    }
+
+    private string GetArticleGroupName(Guid? groupId)
+    {
+        if (articleGroups is null
+            || groupId is null
+            || groupId == Guid.Empty)
+            return string.Empty;
+
+        return articleGroups.Single(ag => ag.Id == groupId).Name ?? string.Empty;
+    }
+}

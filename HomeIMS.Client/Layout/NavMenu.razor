@@ -1,8 +1,13 @@
-﻿<MudNavMenu>
+﻿@using HomeIMS.SharedContracts.Domain.Inventories
+
+@inject HttpClient HttpClient
+
+<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Match="NavLinkMatch.Prefix">Inventory 1</MudNavLink>
-    <MudNavLink Match="NavLinkMatch.Prefix">Inventory 2</MudNavLink>
-    <MudNavLink Match="NavLinkMatch.Prefix">Inventory 3</MudNavLink>
+    @foreach (var inventory in inventories)
+    {
+        <MudNavLink Href="@($"/inventory/{inventory.Id}")" Match="NavLinkMatch.Prefix">@inventory.Name</MudNavLink>
+    }
     <MudNavGroup Title="Administration" Expanded="true">
         <MudNavLink Href="/inventories" Match="NavLinkMatch.Prefix">Inventories</MudNavLink>
         <MudNavLink Href="/article-groups" Match="NavLinkMatch.Prefix">Article Groups</MudNavLink>
@@ -10,3 +15,12 @@
         <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
     </MudNavGroup>
 </MudNavMenu>
+
+@code {
+    private IEnumerable<Inventory> inventories = new List<Inventory>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        inventories = await HttpClient.GetFromJsonAsync<List<Inventory>>("/inventories") ?? new List<Inventory>();
+    }
+}

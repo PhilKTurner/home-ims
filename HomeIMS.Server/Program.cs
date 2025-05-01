@@ -1,5 +1,4 @@
 using System.Data.Common;
-using System.Security.Claims;
 using System.Text.Json;
 using HomeIMS.Server.CommandHandling;
 using HomeIMS.Server.Database;
@@ -7,13 +6,16 @@ using HomeIMS.Server.EventStore;
 using HomeIMS.Server.EventStore.Aggregators;
 using HomeIMS.Server.Identity;
 using HomeIMS.SharedContracts.Commands;
+using HomeIMS.SharedContracts.Domain.ArticleGroups;
+using HomeIMS.SharedContracts.Domain.ArticleGroups.Commands;
 using HomeIMS.SharedContracts.Domain.Articles;
 using HomeIMS.SharedContracts.Domain.Articles.Commands;
+using HomeIMS.SharedContracts.Domain.Inventories;
+using HomeIMS.SharedContracts.Domain.Inventories.Commands;
 using HomeIMS.SharedContracts.EventSourcing;
 using Marten;
 using Marten.Events.Projections;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeIMS.Server;
@@ -99,14 +101,22 @@ public class Program
             options.UseSystemTextJsonForSerialization();
 
             options.Projections.Snapshot<ArticleAggregator>(SnapshotLifecycle.Inline, projectionOptions => projectionOptions.ProjectionName = "Articles");
+            options.Projections.Snapshot<ArticleGroupAggregator>(SnapshotLifecycle.Inline, projectionOptions => projectionOptions.ProjectionName = "ArticleGroups");
+            options.Projections.Snapshot<InventoryAggregator>(SnapshotLifecycle.Inline, projectionOptions => projectionOptions.ProjectionName = "Inventories");
         });
 
         builder.Services.AddScoped<IEventStore, MartenEventStore>();
         builder.Services.AddScoped<IReadModelAccess<ArticleAggregator>, SimpleMartenReadModelAccessor<ArticleAggregator>>();
+        builder.Services.AddScoped<IReadModelAccess<ArticleGroupAggregator>, SimpleMartenReadModelAccessor<ArticleGroupAggregator>>();
+        builder.Services.AddScoped<IReadModelAccess<InventoryAggregator>, SimpleMartenReadModelAccessor<InventoryAggregator>>();
 
         builder.Services.AddScoped<CommandRouter>();
         builder.Services.AddScoped<ICommandHandler<CreateArticle, Article>, CreateArticleHandler>();
         builder.Services.AddScoped<ICommandHandler<UpdateArticle, Article>, UpdateArticleHandler>();
+        builder.Services.AddScoped<ICommandHandler<CreateArticleGroup, ArticleGroup>, CreateArticleGroupHandler>();
+        builder.Services.AddScoped<ICommandHandler<UpdateArticleGroup, ArticleGroup>, UpdateArticleGroupHandler>();
+        builder.Services.AddScoped<ICommandHandler<CreateInventory, Inventory>, CreateInventoryHandler>();
+        builder.Services.AddScoped<ICommandHandler<UpdateInventory, Inventory>, UpdateInventoryHandler>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -172,6 +182,40 @@ public class Program
             if (readResult.IsSuccess)
             {
                 return Results.Ok(readResult.Value?.Aggregate);
+            }
+            else
+            {
+                return Results.Problem(readResult.Errors.First().Message);
+            }
+        })
+        .RequireAuthorization();
+
+        app.MapGet("/article-groups", async (HttpContext httpContext) =>
+        {
+            var readModelAccessor = httpContext.RequestServices.GetRequiredService<IReadModelAccess<ArticleGroupAggregator>>();
+
+            var readResult = await readModelAccessor.GetAll();
+
+            if (readResult.IsSuccess)
+            {
+                return Results.Ok(readResult.Value.Select(x => x.Aggregate));
+            }
+            else
+            {
+                return Results.Problem(readResult.Errors.First().Message);
+            }
+        })
+        .RequireAuthorization();
+
+        app.MapGet("/inventories", async (HttpContext httpContext) =>
+        {
+            var readModelAccessor = httpContext.RequestServices.GetRequiredService<IReadModelAccess<InventoryAggregator>>();
+
+            var readResult = await readModelAccessor.GetAll();
+
+            if (readResult.IsSuccess)
+            {
+                return Results.Ok(readResult.Value.Select(x => x.Aggregate));
             }
             else
             {

@@ -1,8 +1,114 @@
 @page "/article-group/{id:guid?}"
 
+@using HomeIMS.SharedContracts.Commands
+@using HomeIMS.SharedContracts.Domain.ArticleGroups
+@using HomeIMS.SharedContracts.Domain.ArticleGroups.Commands
+@using System.Text.Json
+@using System.Text
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
 <PageTitle>ArticleGroupEditor</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        @if (model is not null)
+        {
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" Label="Name" @bind-Value="model.Name" Required="true" />
+                <MudTextField T="string" Label="Description" @bind-Value="model.Description" />
+            </MudForm>
+
+            <MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+                <MudSpacer />
+                @if (IsCreation || IsEditModeActive)
+                {
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Check" OnClick="Commit" />
+                }
+                else if (!IsCreation && !IsEditModeActive)
+                {
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Edit" OnClick="ToggleEditMode" />
+                }
+            </MudContextualActionBar>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+    </Authorized>
+    <NotAuthorized>
+
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [Parameter]
     public Guid? Id { get; set; }
+
+    private IArticleGroup? model = null;
+    private IArticleGroup? modelBackUp = null;
+
+    public bool IsCreation => Id is null;
+    public bool IsEditModeActive => modelBackUp is not null;
+
+    MudForm form;
+    bool success;
+    string[] errors = { };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            model = await HttpClient.GetFromJsonAsync<ArticleGroup>($"article-group/{Id}");
+        }
+        else
+        {
+            model = new CreateArticleGroup();
+        }
+    }
+
+    public void ToggleEditMode()
+    {
+        if (!IsEditModeActive)
+        {
+            modelBackUp = model;
+            model = new UpdateArticleGroup((ArticleGroup)model);
+        }
+        else
+        {
+            model = modelBackUp;
+            modelBackUp = null;
+        }
+    }
+
+    public async Task Commit()
+    {
+        var commandEnvelope = default(CommandEnvelope);
+
+        if (IsCreation)
+        {
+            var command = model as CreateArticleGroup;
+            if (command is null)
+                throw new InvalidOperationException("Invalid model type");
+
+            commandEnvelope = CommandEnvelope.CreateEnvelope(command);
+        }
+        else
+        {
+            var command = model as UpdateArticleGroup;
+            if (command is null)
+                throw new InvalidOperationException("Invalid model type");
+
+            commandEnvelope = CommandEnvelope.CreateEnvelope(command);
+        }
+        
+        var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
+
+        var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
+        var response = await HttpClient.PostAsync("command", content);
+
+        NavigationManager.NavigateTo("/article-groups");
+    }
 }

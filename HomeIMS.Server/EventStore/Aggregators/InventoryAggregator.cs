@@ -1,16 +1,16 @@
-using HomeIMS.SharedContracts.Domain.Articles;
-using HomeIMS.SharedContracts.Domain.Articles.Events;
+using HomeIMS.SharedContracts.Domain.Inventories;
+using HomeIMS.SharedContracts.Domain.Inventories.Events;
 using HomeIMS.SharedContracts.EventSourcing;
 
 namespace HomeIMS.Server.EventStore.Aggregators;
 
-public class ArticleAggregator : Article, IEventAggregator<Article>
+public class InventoryAggregator : Inventory, IEventAggregator<Inventory>
 {
-    public Article Aggregate => (Article)this;
+    public Inventory Aggregate => (Inventory)this;
 
     public int Version { get; set; }
 
-    public void Apply(ArticleCreated @event)
+    public void Apply(InventoryCreated @event)
     {
         Id = @event.StreamId;
         ArticleGroupId = @event.ArticleGroupId;
@@ -18,7 +18,7 @@ public class ArticleAggregator : Article, IEventAggregator<Article>
         Description = @event.Description;
     }
 
-    public void Apply(ArticleModified @event)
+    public void Apply(InventoryModified @event)
     {
         ArticleGroupId = @event.ArticleGroupId ?? ArticleGroupId;
         Name = @event.Name ?? Name;
