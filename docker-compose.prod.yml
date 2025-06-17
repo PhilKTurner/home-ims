@@ -17,7 +17,7 @@ services:
       - hims-db-userpw
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/HomeIMS.Server.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=thisisatest # TODO this would no longer be a test...
     volumes:
       - ~/.aspnet/https:/https:ro

@@ -13,6 +13,8 @@ Provide passwords as UTF-8 text files in ./.secrets in the local repository:
 - hims-db-userpw
 - hims-eventstore-rootpw
 
+Provide HTTPS certificate in folder `~/.aspnet/https`. See [Generate self-signed certificates with the .NET CLI](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/self-signed-certificates-guide#create-a-self-signed-certificate) for reference.
+
 Build images and run containers:
 
 ```
