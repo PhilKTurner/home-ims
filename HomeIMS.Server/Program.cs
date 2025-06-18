@@ -190,6 +190,23 @@ public class Program
         })
         .RequireAuthorization();
 
+        app.MapGet("/articles", async (HttpContext httpContext) =>
+        {
+            var readModelAccessor = httpContext.RequestServices.GetRequiredService<IReadModelAccess<ArticleAggregator>>();
+
+            var readResult = await readModelAccessor.GetAll();
+
+            if (readResult.IsSuccess)
+            {
+                return Results.Ok(readResult.Value.Select(x => x.Aggregate));
+            }
+            else
+            {
+                return Results.Problem(readResult.Errors.First().Message);
+            }
+        })
+        .RequireAuthorization();
+
         app.MapGet("/article-groups", async (HttpContext httpContext) =>
         {
             var readModelAccessor = httpContext.RequestServices.GetRequiredService<IReadModelAccess<ArticleGroupAggregator>>();

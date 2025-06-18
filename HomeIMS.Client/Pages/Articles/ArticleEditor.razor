@@ -7,66 +7,55 @@
 @using System.Text
 
 @inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
 
 <PageTitle>ArticleEditor</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <MudContainer MaxWidth="MaxWidth.Small">
-            @if (model is not null)
-            {
-                <EditForm Model="model" OnValidSubmit="Submit" Context="editform_context">
-                    <DataAnnotationsValidator />
-                    <MudTextField T="string" Label="Name" @bind-Value="model.Name" Required="true" />
-                    <MudTextField T="string" Label="Description" @bind-Value="model.Description" />
+        @if (model is not null)
+        {
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" Label="Name" @bind-Value="model.Name" Required="true" />
+                <MudTextField T="string" Label="Description" @bind-Value="model.Description" />
+            </MudForm>
 
-                    @if (IsCreation)
-                    {
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                            DropShadow="false">
-                            Create
-                        </MudButton>
-                    }
-                    else
-                    {
-                        <MudStack Row="true">
-                            <MudButton OnClick="ToggleEditMode">@(IsEditModeActive ? "Undo" : "Edit")</MudButton>
-                            @if (IsEditModeActive)
-                            {
-                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                                    DropShadow="false">
-                                    Update
-                                </MudButton>
-                            }
-                        </MudStack>
-                    }
-                </EditForm>
-            }
-            else
-            {
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-            }
-        </MudContainer>
+            <MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
+                <MudSpacer />
+                @if (IsCreation || IsEditModeActive)
+                {
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Check" OnClick="Commit" />
+                }
+                else if (!IsCreation && !IsEditModeActive)
+                {
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Edit" OnClick="ToggleEditMode" />
+                }
+            </MudContextualActionBar>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
     </Authorized>
     <NotAuthorized>
+
     </NotAuthorized>
 </AuthorizeView>
-
-<MudContextualActionBar Bottom="true" Color="Color.Primary" Visible="true">
-    <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Secondary" aria-label="settings" />
-    <MudSpacer />
-    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Check" />
-</MudContextualActionBar>
 
 @code {
     [Parameter]
     public Guid? Id { get; set; }
 
     public bool IsCreation => Id is null;
-    public bool IsEditModeActive => originalModel is not null;
+    public bool IsEditModeActive => modelBackUp is not null;
 
     private IArticle? model = null;
-    private IArticle? originalModel = null;
+    private IArticle? modelBackUp = null;
+
+    MudForm form;
+    bool success;
+    string[] errors = { };
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,17 +73,17 @@
     {
         if (!IsEditModeActive)
         {
-            originalModel = model;
+            modelBackUp = model;
             model = new UpdateArticle((Article)model);
         }
         else
         {
-            model = originalModel;
-            originalModel = null;
+            model = modelBackUp;
+            modelBackUp = null;
         }
     }
 
-    public async Task Submit()
+    public async Task Commit()
     {
         var commandEnvelope = default(CommandEnvelope);
 
@@ -114,10 +103,12 @@
 
             commandEnvelope = CommandEnvelope.CreateEnvelope(command);
         }
-
+        
         var serializedEnvelope = JsonSerializer.Serialize(commandEnvelope);
 
         var content = new StringContent(serializedEnvelope, Encoding.UTF8, "application/json");
         var response = await HttpClient.PostAsync("command", content);
+
+        NavigationManager.NavigateTo("/articles");
     }
 }
